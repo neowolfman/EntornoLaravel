@@ -1,0 +1,69 @@
+version: '3.9'
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    ports:
+      - 8888:80
+    volumes:
+      - ./www:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - laraveldev_net
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: Laraveldb
+      MYSQL_USER: developer
+      MYSQL_PASSWORD: dev1234
+      MYSQL_ROOT_PASSWORD: Ct0rr3s1975
+    ports:
+      - 33069:3306
+    volumes:
+      - ./mysql/data/:/var/lib/mysql
+    networks:
+      - laraveldev_net
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    container_name: phpmyadmin
+    links:
+      - mysql
+    ports:
+      - 81:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql  
+    depends_on:
+      - mysql
+
+  php:
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
+    container_name: php
+    volumes:
+      - ./www/:/var/www/html
+    ports:
+      - 9000:80      
+    networks:
+      - laraveldev_net
+
+networks:
+  laraveldev_net:  
+    name: laraveldev_net
+    driver: bridge
+    ipam:
+      driver: default
+      #config:
+      #  - subnet: 10.16.0.0/28
+      #    gateway: 10.16.0.1
+      
+    

@@ -23,10 +23,12 @@ services:
       MYSQL_USER: developer
       MYSQL_PASSWORD: dev1234
       MYSQL_ROOT_PASSWORD: Ct0rr3s1975
+      TZ: America/Santiago
     ports:
       - 33069:3306
     volumes:
       - ./mysql/data/:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
     networks:
       - laraveldev_net
 
@@ -38,11 +40,13 @@ services:
       - mysql
     ports:
       - 81:80
-    environment:
-      - PMA_ARBITRARY=1
-      - PMA_HOST=mysql  
+    environment:      
+      PMA_HOST: mysql  
     depends_on:
       - mysql
+    networks:
+      - laraveldev_net
+
 
   php:
     build:
@@ -51,6 +55,7 @@ services:
     container_name: php
     volumes:
       - ./www/:/var/www/html
+      - ./php/laravel.ini:/usr/local/etc/php/conf.d/laravel.ini
     ports:
       - 9000:80      
     networks:
@@ -60,8 +65,8 @@ networks:
   laraveldev_net:  
     name: laraveldev_net
     driver: bridge
-    ipam:
-      driver: default
+    #ipam:
+    #  driver: default
       #config:
       #  - subnet: 10.16.0.0/28
       #    gateway: 10.16.0.1
